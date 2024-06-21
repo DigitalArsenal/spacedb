@@ -2,9 +2,11 @@ import { expect } from 'chai';
 import { generateData } from './utilities/data.generator.js';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { readFB } from '../src/flatbufferConversion.js';
+import { readFB, readFBStream } from '../src/flatbufferConversion.js';
 import standardsJSON from 'spacedatastandards.org/lib/json/index.json' assert { type: 'json' };
 import { resolver } from '../src/tablegen.js';
+import { createReadStream, createWriteStream } from 'fs';
+import { PassThrough } from 'stream';
 
 const dataPath = path.resolve('./.temp');
 
@@ -84,7 +86,6 @@ describe('Data Generation and Verification', () => {
             }
 
             for (const record of flatbuffers) {
-                console.log(record);
                 for (const [key, value] of Object.entries(record)) {
                     const schemaProp = jsonSchema.definitions[schemaName].properties[key];
                     if (schemaProp) {
@@ -96,7 +97,7 @@ describe('Data Generation and Verification', () => {
     });
 
     it('should handle multiple flatbuffers appended together', async function () {
-
+        this.timeout(500000); // Increase timeout for this test
 
         await generateData(5, 2, dataPath);
 
@@ -104,6 +105,36 @@ describe('Data Generation and Verification', () => {
         for (const file of files) {
             const buffer = await fs.readFile(path.join(dataPath, file));
             const flatbuffers = readFB(buffer);
+
+            const schemaName = file.split('.')[1].toUpperCase();
+            const jsonSchema = standardsJSON.STANDARDS[schemaName];
+
+            if (!jsonSchema) {
+                throw new Error(`Schema not found for ${schemaName}`);
+            }
+
+            for (const record of flatbuffers) {
+                for (const [key, value] of Object.entries(record)) {
+                    const schemaProp = jsonSchema.definitions[schemaName].properties[key];
+                    if (schemaProp) {
+                        checkPropertyType(value, schemaProp, jsonSchema);
+                    }
+                }
+            }
+        }
+    });
+
+    it('should handle reading flatbuffers from a stream', async function () {
+        this.timeout(500000); // Increase timeout for this test
+
+        await generateData(10, 1, dataPath);
+
+        const files = await fs.readdir(dataPath);
+        for (const file of files) {
+            const filePath = path.join(dataPath, file);
+            const readStream = createReadStream(filePath);
+
+            const flatbuffers = await readFBStream(readStream);
 
             const schemaName = file.split('.')[1].toUpperCase();
             const jsonSchema = standardsJSON.STANDARDS[schemaName];

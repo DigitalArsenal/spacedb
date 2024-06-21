@@ -87,8 +87,7 @@ export const generateData = async (total = 10, numFiles = 5, dataPath = `test/ou
                 objects.push(newObject);
             }
 
-            let resultBuffers = objects.map(obj => writeFB(obj));
-            let resultBuffer = Buffer.concat(resultBuffers);
+            let resultBuffer = writeFB(objects);
             let CID = await ipfsHash.of(resultBuffer);
             writeFileSync(join(dataPath, `${CID}.${standard.toLowerCase()}.fbs`), resultBuffer);
         }
