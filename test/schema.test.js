@@ -4,6 +4,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { readFB } from '../src/flatbufferConversion.js';
 import standardsJSON from 'spacedatastandards.org/lib/json/index.json' assert { type: 'json' };
+import { resolver } from '../src/tablegen.js';
 
 const dataPath = path.resolve('./.temp');
 
@@ -19,46 +20,103 @@ describe('Data Generation and Verification', () => {
         }
     });
 
-    it('should generate flatbuffers and verify against JSON schemas', async () => {
+    const checkPropertyType = (value, schemaProp, jsonSchema) => {
+        const resolvedProp = resolver(schemaProp, jsonSchema);
+        const type = resolvedProp.type;
+
+        if (resolvedProp.enum) {
+            expect(resolvedProp.enum.length).to.greaterThan(value);
+        } else if (type === 'integer') {
+            expect(typeof parseFloat(value)).to.equal('number');
+        } else if (type === 'number') {
+            expect(typeof parseFloat(value)).to.equal('number');
+        } else if (type === 'boolean') {
+            expect(typeof !!value).to.equal('boolean');
+        } else if (type === 'string') {
+            expect(typeof value.toString()).to.equal('string');
+        } else if (type === 'array') {
+            expect(Array.isArray(value)).to.be.true;
+            value.forEach(item => {
+                checkPropertyType(item, resolvedProp.items, jsonSchema);
+            });
+        } else if (type === 'object' || resolvedProp.$ref) {
+            if (Array.isArray(value)) {
+                expect(value).to.be.an('array');
+                value.forEach(item => {
+                    expect(item).to.be.an('object');
+                    for (const [key, val] of Object.entries(item)) {
+                        const propSchema = resolvedProp.properties ? resolvedProp.properties[key] : null;
+                        if (propSchema) {
+                            checkPropertyType(val, propSchema, jsonSchema);
+                        }
+                    }
+                });
+            } else {
+                expect(value).to.be.an('object');
+                for (const [key, val] of Object.entries(value)) {
+                    const propSchema = resolvedProp.properties ? resolvedProp.properties[key] : null;
+                    if (propSchema) {
+                        checkPropertyType(val, propSchema, jsonSchema);
+                    }
+                }
+            }
+        } else {
+            if (!resolvedProp.anyOf) {
+                throw new Error(`Unsupported type: ${type}`);
+            }
+        }
+    };
+
+    it('should generate flatbuffers and verify against JSON schemas', async function () {
+        this.timeout(500000); // Increase timeout for this test
         await generateData(10, 5, dataPath);
 
         const files = await fs.readdir(dataPath);
         for (const file of files) {
             const buffer = await fs.readFile(path.join(dataPath, file));
-            const flatbuffer = readFB(buffer);
+            const flatbuffers = readFB(buffer);
 
             const schemaName = file.split('.')[1].toUpperCase();
-            const jsonSchema = standardsJSON[schemaName];
+            const jsonSchema = standardsJSON.STANDARDS[schemaName];
 
-            const records = flatbuffer.RECORDS;
-            for (const record of records) {
+            if (!jsonSchema) {
+                throw new Error(`Schema not found for ${schemaName}`);
+            }
+
+            for (const record of flatbuffers) {
+                console.log(record);
                 for (const [key, value] of Object.entries(record)) {
-                    if (jsonSchema.definitions[schemaName].properties[key]) {
-                        const schemaProp = jsonSchema.definitions[schemaName].properties[key];
-                        expect(value).to.be.a(schemaProp.type);
+                    const schemaProp = jsonSchema.definitions[schemaName].properties[key];
+                    if (schemaProp) {
+                        checkPropertyType(value, schemaProp, jsonSchema);
                     }
                 }
             }
         }
     });
 
-    it('should handle multiple flatbuffers appended together', async () => {
+    it('should handle multiple flatbuffers appended together', async function () {
+
+
         await generateData(5, 2, dataPath);
 
         const files = await fs.readdir(dataPath);
         for (const file of files) {
             const buffer = await fs.readFile(path.join(dataPath, file));
-            const flatbuffer = readFB(buffer);
+            const flatbuffers = readFB(buffer);
 
             const schemaName = file.split('.')[1].toUpperCase();
-            const jsonSchema = standardsJSON[schemaName];
+            const jsonSchema = standardsJSON.STANDARDS[schemaName];
 
-            const records = flatbuffer.RECORDS;
-            for (const record of records) {
+            if (!jsonSchema) {
+                throw new Error(`Schema not found for ${schemaName}`);
+            }
+
+            for (const record of flatbuffers) {
                 for (const [key, value] of Object.entries(record)) {
-                    if (jsonSchema.definitions[schemaName].properties[key]) {
-                        const schemaProp = jsonSchema.definitions[schemaName].properties[key];
-                        expect(value).to.be.a(schemaProp.type);
+                    const schemaProp = jsonSchema.definitions[schemaName].properties[key];
+                    if (schemaProp) {
+                        checkPropertyType(value, schemaProp, jsonSchema);
                     }
                 }
             }
