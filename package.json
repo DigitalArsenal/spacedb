@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js -w src, index.js",
+    "dev": "nodemon index.js -w src",
     "test": "mocha",
     "test:watch": "nodemon --exec 'npm test' --watch ."
   },
@@ -27,7 +27,7 @@
     "path": "^0.12.7",
     "promises": "^0.2.5",
     "pure-ipfs-only-hash": "^4.0.2",
-    "spacedatastandards.org": "^1.0.181",
+    "spacedatastandards.org": "^1.0.188",
     "zlib": "^1.0.5"
   }
 }

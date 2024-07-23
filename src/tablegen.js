@@ -1,6 +1,9 @@
 import { writeFileSync, existsSync } from "fs";
-export { resolver } from "./resolver.js";
+import { resolver } from "./resolver.js";
+export { resolver };
 import db from "./db.js";
+
+const foreignTypes = ["object", "array", "union"];
 
 export const fTCheck = (ftPredicate) => foreignTypes.indexOf(ftPredicate) !== -1;
 
@@ -21,7 +24,7 @@ const knexNumberTypes = {
     18446744073709551615: "bigint",
 };
 
-const foreignTypes = ["object", "array", "union"];
+
 
 
 

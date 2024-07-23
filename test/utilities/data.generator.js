@@ -1,10 +1,9 @@
 import { fTCheck, refRootName, resolver } from "../../src/tablegen.js";
 import { writeFileSync } from 'fs';
 import standardsJSON from 'spacedatastandards.org/lib/json/index.json' assert { type: 'json' };
-import * as standards from 'spacedatastandards.org/lib/js/index.js';
+import { standards, writeFB } from 'spacedatastandards.org';
 import { faker } from '@faker-js/faker';
 import { execSync } from 'child_process';
-import { writeFB } from '../../src/flatbufferConversion.js';
 import { join } from 'path';
 import ipfsHash from 'pure-ipfs-only-hash';
 

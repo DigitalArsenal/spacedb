@@ -2,11 +2,10 @@ import { expect } from 'chai';
 import { generateData } from './utilities/data.generator.js';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { readFB, readFBStream } from '../src/flatbufferConversion.js';
+import { readFB, readFBStream } from 'spacedatastandards.org';
 import standardsJSON from 'spacedatastandards.org/lib/json/index.json' assert { type: 'json' };
 import { resolver } from '../src/tablegen.js';
-import { createReadStream, createWriteStream } from 'fs';
-import { PassThrough } from 'stream';
+import { createReadStream } from 'fs';
 
 const dataPath = path.resolve('./.temp');
 
