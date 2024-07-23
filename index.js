@@ -1,12 +1,11 @@
 import { generateDatabase } from './src/tablegen.js';
-import { readFileSync } from 'fs';
-import path from 'path';
 import schemas from "spacedatastandards.org/lib/json/index.json" assert {type: "json"};
+import packageJSON from "spacedatastandards.org/package.json" assert {type: "json"};
 
 const { STANDARDS } = schemas;
 
 // Generate the database
-generateDatabase(Object.values(STANDARDS), 'output.sql')
+generateDatabase(Object.values(STANDARDS), `./sql/${packageJSON.version}.sql`)
     .then(() => {
         console.log('Database schema generated successfully.');
     })

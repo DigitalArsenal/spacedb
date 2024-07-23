@@ -24,10 +24,6 @@ const knexNumberTypes = {
     18446744073709551615: "bigint",
 };
 
-
-
-
-
 const builder = (predicateName, predicate, jsonSchema, rootPredicate, parentPredicate) => {
     let { type, $ref, $$ref, properties, items } = predicate;
     parentPredicates[refRootName($$ref)] = parentPredicate || rootPredicate;
