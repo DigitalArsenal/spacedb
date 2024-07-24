@@ -163,3 +163,7 @@ If you need to run the tests manually, you can start the MySQL container and the
 ## License
 
 This project is licensed under the terms of the [license](LICENSE.md) file included in this repository.
+
+## Contact
+
+[spacedb@digitalarsenal.io](mailto:spacedb@digitalarsenal.io)
