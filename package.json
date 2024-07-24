@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js -w src -w index.js",
-    "test": "mocha",
+    "test": "docker-compose -f test/docker-compose.yml up -d && mocha --timeout 10000 && docker-compose -f test/docker-compose.yml down",
     "test:watch": "nodemon --exec 'npm test' --watch ."
   },
   "author": "",

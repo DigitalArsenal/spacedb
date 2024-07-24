@@ -1,0 +1,10 @@
+version: '3.1'
+
+services:
+  mysqldb:
+    build: .
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: "testdb"

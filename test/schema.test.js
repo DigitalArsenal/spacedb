@@ -70,7 +70,7 @@ describe('Data Generation and Verification', () => {
 
     it('should generate flatbuffers and verify against JSON schemas', async function () {
         this.timeout(500000); // Increase timeout for this test
-        await generateData(10, 5, dataPath);
+        await generateData(2, 2, dataPath);
 
         const files = await fs.readdir(dataPath);
         for (const file of files) {

@@ -1,0 +1,6 @@
+# Dockerfile for MySQL
+FROM mysql:latest
+
+ENV MYSQL_ROOT_PASSWORD=
+ENV MYSQL_DATABASE=testdb
+EXPOSE 3306
