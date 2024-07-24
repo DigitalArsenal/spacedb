@@ -159,3 +159,7 @@ If you need to run the tests manually, you can start the MySQL container and the
    docker-compose -f test/docker-compose.yml down
    ```sh
    ````
+
+## License
+
+This project is licensed under the terms of the [license](LICENSE.md) file included in this repository.
